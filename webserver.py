@@ -1,3 +1,4 @@
+#!/usr/bin/python
 #Copyright Jon Berg , turtlemeat.com
 
 import string,cgi,time
@@ -5,10 +6,22 @@ from os import curdir, sep
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 #import pri
 
+from pology.file.catalog import Catalog
+from pology.misc.msgreport import report_msg_content
+
+cat = Catalog("/home/sasha/messages/kdebase/dolphin.po")
+
 class MyHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         try:
+            if self.path.endswith("/cat"):
+                self.send_response(200)
+                self.end_headers()
+		self.wfile.write("<html>")
+                for msg in cat:
+                    self.wfile.write(msg.msgid + "<br/>")
+		self.wfile.write("</html>")
             if self.path.endswith(".html"):
                 f = open(curdir + sep + self.path) #self.path has /test.html
 #note that this potentially makes every file on your computer readable by the internet
