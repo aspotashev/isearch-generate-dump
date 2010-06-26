@@ -11,6 +11,28 @@ from pology.misc.msgreport import report_msg_content
 
 cat = Catalog("/home/sasha/messages/kdebase/dolphin.po")
 
+class NoneType:
+    def len():
+        return 0
+
+def msg_to_s(msg):
+    return str({
+        'manual_comment': msg.manual_comment,
+        'auto_comment': msg.auto_comment,
+        'source': msg.source,
+        'flag': msg.flag,
+        'obsolete': msg.obsolete,
+        'msgctxt_previous': msg.msgctxt_previous,
+        'msgid_previous': msg.msgid_previous,
+        'msgid_plural_previous': msg.msgid_plural_previous,
+        'msgctxt': msg.msgctxt,
+        'msgid': msg.msgid,
+        'msgid_plural': msg.msgid_plural,
+        'msgstr': msg.msgstr,
+        'refline': msg.refline,
+        'refentry': msg.refentry,
+        })
+
 class MyHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
@@ -18,10 +40,9 @@ class MyHandler(BaseHTTPRequestHandler):
             if self.path.endswith("/cat"):
                 self.send_response(200)
                 self.end_headers()
-		self.wfile.write("<html>")
-                for msg in cat:
-                    self.wfile.write(msg.msgid + "<br/>")
-		self.wfile.write("</html>")
+                self.wfile.write("<html>")
+		self.wfile.write(map(msg_to_s, cat))
+                self.wfile.write("</html>")
             if self.path.endswith(".html"):
                 f = open(curdir + sep + self.path) #self.path has /test.html
 #note that this potentially makes every file on your computer readable by the internet
