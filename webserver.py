@@ -1,8 +1,4 @@
 #!/usr/bin/python
-
-import string,cgi,time
-from os import curdir, sep
-
 from pology.file.catalog import Catalog
 from pology.misc.msgreport import report_msg_content
 
