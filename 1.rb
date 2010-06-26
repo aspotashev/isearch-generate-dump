@@ -41,13 +41,22 @@ class StringPyParser
 		forward   # skip '['
 
 		res = []
-		res << parse while not pnil?(res.last)
-		res.pop
-		res
+		while true
+			if c(0..1) == ', '
+				forward(2)
+			elsif c == ']'
+				break
+			end
 
-		p "parse_array: #{c}"
+			res_new = parse
+			res << res_new
+
+			p res
+		end
+
 		raise if c != ']'
-		forward
+		forward   # skip ']'
+		res
 	end
 
 	def parse_hash
@@ -57,14 +66,10 @@ class StringPyParser
 		while true
 			res_key = parse
 
-			raise if pnil?(res_key)
-
 			raise "heh #{c(0..1)}, #{@i}" if c(0..1) != ': '
 			forward(2)
 
 			res_value = parse
-
-			raise if pnil?(res_value)
 
 			raise if res.has_key?(res_key)
 			res[res_key] = res_value
