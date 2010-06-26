@@ -8,10 +8,6 @@ from pology.misc.msgreport import report_msg_content
 
 cat = Catalog("/home/sasha/messages/kdebase/dolphin.po")
 
-class NoneType:
-    def len():
-        return 0
-
 def msg_to_s(msg):
     return str({
         'manual_comment': msg.manual_comment,
