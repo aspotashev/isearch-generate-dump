@@ -135,8 +135,16 @@ class StringPyParser
 				res += c
 				forward
 			else
-				return res
+				break
 			end
+		end
+
+		if res == 'None'
+			nil
+		elsif res == 'False'
+			false
+		else
+			raise
 		end
 	end
 
