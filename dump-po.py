@@ -1,8 +1,13 @@
 #!/usr/bin/python
+
+# Usage:
+#   ./dump-po.py /home/sasha/messages/kdebase/dolphin.po
+
+import sys
 from pology.file.catalog import Catalog
 from pology.misc.msgreport import report_msg_content
 
-cat = Catalog("/home/sasha/messages/kdebase/dolphin.po")
+cat = Catalog(sys.argv[1])
 
 def msg_to_s(msg):
     return str({
