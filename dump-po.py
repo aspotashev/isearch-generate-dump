@@ -10,7 +10,7 @@ from pology.misc.msgreport import report_msg_content
 cat = Catalog(sys.argv[1])
 
 def msg_to_s(msg):
-    return str({
+    return {
         'manual_comment': msg.manual_comment,
         'auto_comment': msg.auto_comment,
         'source': msg.source,
@@ -25,7 +25,7 @@ def msg_to_s(msg):
         'msgstr': msg.msgstr,
         'refline': msg.refline,
         'refentry': msg.refentry,
-        })
+        }
 
 def main():
     print map(msg_to_s, cat)
