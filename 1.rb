@@ -97,8 +97,6 @@ class StringPyParser
 					forward(5)
 
 					res << "<<<hehe, #{code}>>>"
-
-					p "parse_string: #{c}"
 				else
 					raise
 				end
@@ -164,5 +162,5 @@ end
 dump = `python dump-po.py /home/sasha/messages/kdebase/plasma_runner_recentdocuments.po`
 print dump
 
-dump.pyload
+p dump.pyload
 
