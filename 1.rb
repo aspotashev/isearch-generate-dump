@@ -2,6 +2,7 @@
 
 require 'yaml'
 
-dump = `python dump-po.py /home/sasha/messages/kdebase/dolphin.po`
-p YAML::load(dump)
+dump = `python dump-po.py /home/sasha/messages/kdebase/plasma_runner_recentdocuments.po`
+print dump
+#p YAML::load(dump)
 
