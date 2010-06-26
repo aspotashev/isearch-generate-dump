@@ -50,8 +50,6 @@ class StringPyParser
 
 			res_new = parse
 			res << res_new
-
-			p res
 		end
 
 		raise if c != ']'
@@ -99,14 +97,15 @@ class StringPyParser
 					forward(5)
 
 					res << "<<<hehe, #{code}>>>"
+
+					p "parse_string: #{c}"
 				else
 					raise
 				end
 			else
 				res += c
+				forward
 			end
-
-			forward
 		end
 
 		forward
@@ -164,7 +163,6 @@ end
 
 dump = `python dump-po.py /home/sasha/messages/kdebase/plasma_runner_recentdocuments.po`
 print dump
-#p YAML::load(dump)
 
 dump.pyload
 
