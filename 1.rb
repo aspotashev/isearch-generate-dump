@@ -25,6 +25,8 @@ class StringPyParser
 			@s[@i..@i]
 		elsif x.is_a?(Range)
 			@s[(@i + x.first)..(@i + x.last)]
+		elsif x.is_a?(Integer)
+			@s[(@i + x)..(@i + x)]
 		else
 			raise
 		end
@@ -43,6 +45,7 @@ class StringPyParser
 		res.pop
 		res
 
+		p "parse_array: #{c}"
 		raise if c != ']'
 		forward
 	end
@@ -54,9 +57,9 @@ class StringPyParser
 		while true
 			res_key = parse
 
-			break if pnil?(res_key)
+			raise if pnil?(res_key)
 
-			raise "heh #{c(0..1)}" if c(0..1) != ': '
+			raise "heh #{c(0..1)}, #{@i}" if c(0..1) != ': '
 			forward(2)
 
 			res_value = parse
@@ -65,8 +68,16 @@ class StringPyParser
 
 			raise if res.has_key?(res_key)
 			res[res_key] = res_value
+
+			if c(0..1) == ', '
+				forward(2)
+			elsif c == '}'
+				break
+			end
 		end
 
+		raise if c != '}'
+		forward   # skip '}'
 		res
 	end
 
@@ -76,7 +87,16 @@ class StringPyParser
 		res = ''
 		while c != quote_char
 			if c == '\\'
-				raise
+				forward
+
+				if c == 'u'
+					code = c(1..5)
+					forward(5)
+
+					res << "<<<hehe, #{code}>>>"
+				else
+					raise
+				end
 			else
 				res += c
 			end
@@ -88,6 +108,36 @@ class StringPyParser
 		res
 	end
 
+	def parse_number
+		res = ''
+		while true
+			if c =~ /[0-9\.]/
+				res += c
+				forward
+			else
+				raise if res.match(/\./)
+				return res.to_i
+			end
+		end
+	end
+
+	def parse_ident
+		if c(0..1) == 'u\''
+			forward
+			return parse_string('\'')
+		end
+
+		res = ''
+		while true
+			if c =~ /[a-zA-Z]/
+				res += c
+				forward
+			else
+				return res
+			end
+		end
+	end
+
 	def parse
 		if c == '['
 			parse_array
@@ -95,8 +145,14 @@ class StringPyParser
 			parse_hash
 		elsif c == '\''
 			parse_string(c)
+		elsif c =~ /[0-9]/
+			parse_number
+		elsif c == '}' or c == ']'
+			StringPyParser::Nil.new
+		elsif c =~ /[a-zA-Z]/
+			parse_ident
 		else
-			raise "Unexpected char: '#{c}'"
+			raise "Unexpected char: '#{c}', pos #{@i}"
 		end
 	end
 end
