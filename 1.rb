@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 
 require 'yaml'
+require 'iconv'
 
 String.class_eval do
 	def pyload
@@ -93,10 +94,8 @@ class StringPyParser
 				forward
 
 				if c == 'u'
-					code = c(1..5)
+					res << Iconv.iconv('utf-8', 'UCS-2', c(3..4).hex.chr + c(1..2).hex.chr)[0]
 					forward(5)
-
-					res << "<<<hehe, #{code}>>>"
 				else
 					raise
 				end
