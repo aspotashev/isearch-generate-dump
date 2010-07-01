@@ -84,6 +84,10 @@ class StringPyParser
 		res
 	end
 
+	def unicode_to_char(code)
+		Iconv.iconv('utf-8', 'UCS-2', code[2..3].hex.chr + code[0..1].hex.chr)[0]
+	end
+
 	def parse_string(quote_char)
 		forward   # skip quoting char
 
@@ -93,8 +97,11 @@ class StringPyParser
 				forward
 
 				if c == 'u'
-					res << Iconv.iconv('utf-8', 'UCS-2', c(3..4).hex.chr + c(1..2).hex.chr)[0]
+					res << unicode_to_char(c(1..4))
 					forward(5)
+				elsif c == 'x'
+					res << unicode_to_char('00' + c(1..2))
+					forward(3)
 				else
 					raise "Symbol: #{c}"
 				end
