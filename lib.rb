@@ -155,6 +155,8 @@ class StringPyParser
 			nil
 		elsif res == 'False'
 			false
+		elsif res == 'True'
+			true
 		else
 			raise "Unknown ident: [#{res}], #{c(0..10)}"
 		end
