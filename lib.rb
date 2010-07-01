@@ -133,6 +133,10 @@ class StringPyParser
 			forward
 			return parse_string('\'')
 		end
+		if c(0..1) == 'u"'
+			forward
+			return parse_string('"')
+		end
 
 		res = ''
 		while true
@@ -149,7 +153,7 @@ class StringPyParser
 		elsif res == 'False'
 			false
 		else
-			raise
+			raise "Unknown ident: [#{res}], #{c(0..10)}"
 		end
 	end
 
