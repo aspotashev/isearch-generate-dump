@@ -102,6 +102,9 @@ class StringPyParser
 				elsif c == 'x'
 					res << unicode_to_char('00' + c(1..2))
 					forward(3)
+				elsif c == 't'
+					res << "\t"
+					forward
 				else
 					raise "Symbol: #{c}"
 				end
