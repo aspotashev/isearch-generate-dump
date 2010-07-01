@@ -96,7 +96,7 @@ class StringPyParser
 					res << Iconv.iconv('utf-8', 'UCS-2', c(3..4).hex.chr + c(1..2).hex.chr)[0]
 					forward(5)
 				else
-					raise
+					raise "Symbol: #{c}"
 				end
 			else
 				res += c
