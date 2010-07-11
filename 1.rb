@@ -8,5 +8,7 @@ def dump_message_text(m)
 end
 
 a = load_messages('/home/sasha/messages/kdebase/plasma_applet_pager.po')
-puts a.map {|x| dump_message_text(x) }.join
+File.open('../dump.dat', 'w') do |f|
+	f.write a.map {|x| dump_message_text(x) }.join
+end
 
