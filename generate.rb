@@ -1,5 +1,9 @@
 #!/usr/bin/ruby18
 
+# TODO: rewrite in C to improve performance
+# http://www.gnu.org/software/gettext/manual/gettext.html#libgettextpo
+
+
 require 'lib.rb'
 
 def dump_message_text(m)
