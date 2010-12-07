@@ -1,4 +1,4 @@
 adapter: sqlite3
-database: db.sqlite3
+database: /home/sasha/python-l10n-db-server/generate-dump/db.sqlite3
 pool: 5
 timeout: 5000
