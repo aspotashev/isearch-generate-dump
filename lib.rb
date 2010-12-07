@@ -105,8 +105,17 @@ class StringPyParser
 				elsif c == 't'
 					res << "\t"
 					forward
+				elsif c == 'n'
+					res << "\n"
+					forward
+				elsif c == '\''
+					res << "'"
+					forward
+				elsif c == "\\"
+					res << "\\"
+					forward
 				else
-					raise "Symbol: #{c}"
+					raise "Symbol: #{c}, also here: #{c(-5..10)}"
 				end
 			else
 				res += c
@@ -182,6 +191,8 @@ class StringPyParser
 end
 
 def load_messages(file)
-	`python dump-po.py #{file}`.pyload
+#	`python dump-po.py #{file}`.pyload
+#	`python ../generate-dump/dump-po.py #{file}`.pyload
+	`python /home/sasha/python-l10n-db-server/generate-dump/dump-po.py #{file}`.pyload
 end
 

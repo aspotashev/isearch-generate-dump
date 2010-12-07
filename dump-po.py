@@ -4,8 +4,8 @@
 #   ./dump-po.py /home/sasha/messages/kdebase/dolphin.po
 
 import sys
-from pology.file.catalog import Catalog
-from pology.misc.msgreport import report_msg_content
+from pology.catalog import Catalog
+from pology.msgreport import report_msg_content
 
 cat = Catalog(sys.argv[1])
 
