@@ -70,7 +70,10 @@ class StringPyParser
 			res_value = parse
 
 			raise if res.has_key?(res_key)
-			res[res_key] = res_value
+
+			if res_key != '#' # Python _probably_ (investigate this!) adds '#' key to hashes
+				res[res_key] = res_value
+			end
 
 			if c(0..1) == ', '
 				forward(2)

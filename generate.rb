@@ -8,6 +8,8 @@ require 'active_record'
 require 'lib.rb'
 
 def dump_message_text(m)
+# TODO: dump more
+
 	s = m['msgid'] + m['msgstr']['*'][0]
 	Iconv.iconv('UCS-2', 'utf-8', s)[0]
 end
@@ -29,7 +31,10 @@ class CreateDb < ActiveRecord::Migration
 			t.integer :index
 
 			t.string :msgid
-			t.string :msgstr
+			t.string :msgstr0
+			t.string :msgstr1
+			t.string :msgstr2
+			t.string :msgstr3
 		end
 	end
 
@@ -52,6 +57,11 @@ input_files.each do |i_file_full|
 
 	a = load_messages(i_file_full)
 	a.each_with_index do |x,index|
+		# Completely ignore obsolete messages
+		if x['obsolete'] == true
+			next
+		end
+
 		# Dump message to .dat file (for isearch)
 		dump_text = dump_message_text(x)
 		f_dump.write dump_text
@@ -68,7 +78,17 @@ input_files.each do |i_file_full|
 		PoMessageEntry.create(
 			:filename => i_file,
 			:index => index,
-			:msgid => x['msgid'], :msgstr => x['msgstr'])
+
+			:msgid => x['msgid'],
+			:msgstr0 => x['msgstr']['*'][0],
+			:msgstr1 => x['msgstr']['*'][1],
+			:msgstr2 => x['msgstr']['*'][2],
+			:msgstr3 => x['msgstr']['*'][3])
+
+#		p x
+#		p x['msgstr']['*']
+
+		raise if not [1, 4].include?(x['msgstr']['*'].size) # number of plural forms
 	end
 end
 
