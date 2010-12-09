@@ -12,8 +12,8 @@ def dump_message_text(m)
 	Iconv.iconv('UCS-2', 'utf-8', s)[0]
 end
 
-#input_files = ['/home/sasha/messages/kdebase/plasma_applet_pager.po']
-input_files = `ls /home/sasha/messages/kdeutils/*.po`.split("\n")
+conf = YAML::load(File.open('config.yml'))
+input_files = `ls #{conf['prefix']}/#{conf['filemask']}`.split("\n")
 
 f_dump = File.open('../dump.dat', 'w')
 f_mapping = File.open('../dump-map.txt', 'w')
@@ -45,10 +45,12 @@ class PoMessageEntry < ActiveRecord::Base
 	set_table_name "po_messages"
 end
 
-input_files.each do |i_file|
-	puts "Parsing " + i_file
+input_files.each do |i_file_full|
+	i_file = i_file_full.sub(conf['prefix'], '').sub(/\/*/, '')
 
-	a = load_messages(i_file)
+	puts "Parsing " + i_file_full
+
+	a = load_messages(i_file_full)
 	a.each_with_index do |x,index|
 		# Dump message to .dat file (for isearch)
 		dump_text = dump_message_text(x)
@@ -63,7 +65,10 @@ input_files.each do |i_file|
 		end
 
 		# Dump message to database
-		PoMessageEntry.create(:filename => i_file, :index => index, :msgid => x['msgid'], :msgstr => x['msgstr'])
+		PoMessageEntry.create(
+			:filename => i_file,
+			:index => index,
+			:msgid => x['msgid'], :msgstr => x['msgstr'])
 	end
 end
 
