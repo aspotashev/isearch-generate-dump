@@ -1,11 +1,12 @@
-#!/usr/bin/ruby18
+#!/usr/bin/ruby
 
 # TODO: rewrite in C to improve performance
 # http://www.gnu.org/software/gettext/manual/gettext.html#libgettextpo
 
 
 require 'active_record'
-require 'lib.rb'
+require './lib.rb'
+require 'iconv'
 
 def dump_message_text(m)
 # TODO: dump more
