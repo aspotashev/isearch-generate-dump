@@ -90,7 +90,11 @@ input_files.each do |i_file_full|
 #		p x
 #		p x['msgstr']['*']
 
-		raise if not [1, 4].include?(x['msgstr']['*'].size) # number of plural forms
+		if not [1, 4].include?(x['msgstr']['*'].size) # number of plural forms
+			#raise
+
+			puts "Warning: wrong number of plural forms"
+		end
 	end
 end
 
