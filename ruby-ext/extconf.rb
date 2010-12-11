@@ -3,4 +3,5 @@
 require 'mkmf'
 extension_name = 'poreader'
 dir_config(extension_name)
+$libs = append_library($libs, "gettextpo")
 create_makefile(extension_name)
