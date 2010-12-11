@@ -20,6 +20,8 @@ input_files = `ls #{conf['prefix']}/#{conf['filemask']}`.split("\n")
 f_dump = File.open('../dump.dat', 'w')
 f_mapping = File.open('../dump-map.txt', 'w')
 
+`rm ../dump-index.dat` # remove old index, need to regenerate it
+
 pos = 0   # number of unicode chars dumped
 
 ActiveRecord::Base.establish_connection(YAML::load(File.open('database.yml')))
