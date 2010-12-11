@@ -10,7 +10,7 @@ require 'lib.rb'
 def dump_message_text(m)
 # TODO: dump more
 
-	s = m['msgid'] + m['msgstr']['*'][0]
+	s = m['msgid'] + m['msgstr'][0]
 	Iconv.iconv('UCS-2', 'utf-8', s)[0]
 end
 
@@ -59,8 +59,8 @@ input_files.each do |i_file_full|
 
 	a = load_messages(i_file_full)
 	a.each_with_index do |x,index|
-		# Completely ignore obsolete messages
-		if x['obsolete'] == true
+		# Completely ignore obsolete and fuzzy messages
+		if x['obsolete'] == true or x['fuzzy'] == true
 			next
 		end
 
@@ -82,15 +82,15 @@ input_files.each do |i_file_full|
 			:index => index,
 
 			:msgid => x['msgid'],
-			:msgstr0 => x['msgstr']['*'][0],
-			:msgstr1 => x['msgstr']['*'][1],
-			:msgstr2 => x['msgstr']['*'][2],
-			:msgstr3 => x['msgstr']['*'][3])
+			:msgstr0 => x['msgstr'][0],
+			:msgstr1 => x['msgstr'][1],
+			:msgstr2 => x['msgstr'][2],
+			:msgstr3 => x['msgstr'][3])
 
 #		p x
 #		p x['msgstr']['*']
 
-		if not [1, 4].include?(x['msgstr']['*'].size) # number of plural forms
+		if not [1, 4].include?(x['msgstr'].size) # number of plural forms
 			#raise
 
 			puts "Warning: wrong number of plural forms"
