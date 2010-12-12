@@ -1,0 +1,6 @@
+adapter: postgresql
+database: kde-po-messages
+username: kde-ru
+password: ********
+pool: 5
+timeout: 5000
