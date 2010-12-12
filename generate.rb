@@ -39,6 +39,8 @@ class CreateDb < ActiveRecord::Migration
 			t.text :msgstr2
 			t.text :msgstr3
 		end
+
+		add_index :po_messages, [:filename, :index]
 	end
 
 	def self.down
