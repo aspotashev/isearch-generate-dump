@@ -33,11 +33,11 @@ class CreateDb < ActiveRecord::Migration
 			t.string :filename
 			t.integer :index
 
-			t.string :msgid
-			t.string :msgstr0
-			t.string :msgstr1
-			t.string :msgstr2
-			t.string :msgstr3
+			t.text :msgid
+			t.text :msgstr0
+			t.text :msgstr1
+			t.text :msgstr2
+			t.text :msgstr3
 		end
 	end
 
