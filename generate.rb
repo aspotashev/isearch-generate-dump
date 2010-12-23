@@ -14,12 +14,12 @@ end
 conf = YAML::load(File.open('config.yml'))
 input_files = `ls #{conf['prefix']}/#{conf['filemask']}`.split("\n")
 
-f_dump = File.open('../dump.dat', 'w')
-f_mapping = File.open('../dump-map.txt', 'w')
+$f_dump = File.open('../dump.dat', 'w')
+$f_mapping = File.open('../dump-map.txt', 'w')
 
 `rm ../dump-index.dat` # remove old index, need to regenerate it
 
-pos = 0   # number of unicode chars dumped
+$pos = 0   # number of unicode chars dumped
 
 ActiveRecord::Base.establish_connection(YAML::load(File.open('database.yml')))
 
@@ -47,13 +47,21 @@ end
 CreateDb.migrate(:down)
 CreateDb.migrate(:up)
 
-class PoMessageEntry < ActiveRecord::Base
-	set_table_name "po_messages"
+def dump_message_to_isearch(i_file, x, index)
+	# Dump message to .dat file (for isearch)
+	dump_text = dump_message_text(x)
+	$f_dump.write dump_text
+	$f_mapping.puts "#{$pos} #{i_file}:#{index}"
+	$pos += dump_text.size / 2
+
+	if ((dump_text.size % 2) != 0)
+		p dump_text.size
+		p dump_text
+		raise
+	end
 end
 
-input_files.each do |i_file_full|
-	i_file = i_file_full.sub(conf['prefix'], '').sub(/\/*/, '')
-
+def fill_databases_from_file(i_file_full, i_file)
 	puts "Parsing " + i_file_full
 
 	a = load_messages(i_file_full)
@@ -63,17 +71,7 @@ input_files.each do |i_file_full|
 			next
 		end
 
-		# Dump message to .dat file (for isearch)
-		dump_text = dump_message_text(x)
-		f_dump.write dump_text
-		f_mapping.puts "#{pos} #{i_file}:#{index}"
-		pos += dump_text.size / 2
-
-		if ((dump_text.size % 2) != 0)
-			p dump_text.size
-			p dump_text
-			raise
-		end
+		dump_message_to_isearch(i_file, x, index)
 
 		# Dump message to database
 		PoMessageEntry.create(
@@ -95,5 +93,14 @@ input_files.each do |i_file_full|
 			puts "Warning: wrong number of plural forms"
 		end
 	end
+end
+
+class PoMessageEntry < ActiveRecord::Base
+	set_table_name "po_messages"
+end
+
+input_files.each do |i_file_full|
+	i_file = i_file_full.sub(conf['prefix'], '').sub(/\/*/, '')
+	fill_databases_from_file(i_file_full, i_file)
 end
 
