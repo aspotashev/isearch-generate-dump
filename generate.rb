@@ -11,8 +11,8 @@ def dump_message_text(m)
 	Iconv.iconv('UCS-2', 'utf-8', s)[0]
 end
 
-conf = YAML::load(File.open('config.yml'))
-input_files = `ls #{conf['prefix']}/#{conf['filemask']}`.split("\n")
+$conf = YAML::load(File.open('config.yml'))
+input_files = `ls #{$conf['prefix']}/#{$conf['filemask']}`.split("\n")
 
 $f_dump = File.open('../dump.dat', 'w')
 $f_mapping = File.open('../dump-map.txt', 'w')
@@ -83,7 +83,7 @@ class PoMessageEntry < ActiveRecord::Base
 end
 
 input_files.each do |i_file_full|
-	i_file = i_file_full.sub(conf['prefix'], '').sub(/\/*/, '')
+	i_file = i_file_full.sub($conf['prefix'], '').sub(/\/*/, '')
 
 	puts "Parsing " + i_file_full
 
