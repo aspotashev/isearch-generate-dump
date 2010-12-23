@@ -61,16 +61,27 @@ def dump_message_to_isearch(i_file, x, index)
 	end
 end
 
+def load_messages_valid(i_file_full)
+	a = load_messages(i_file_full)
+
+	# Completely ignore obsolete and fuzzy messages
+	a = a.select {|x| x['obsolete'] != true && x['fuzzy'] != true && x['msgid'] != '' }
+
+	a.each do |x|
+		if not [1, 4].include?(x['msgstr'].size) # number of plural forms
+			#raise
+
+			puts "Warning: wrong number of plural forms"
+		end
+	end
+
+	a
+end
+
 def fill_databases_from_file(i_file_full, i_file)
 	puts "Parsing " + i_file_full
 
-	a = load_messages(i_file_full)
-	a.each do |x|
-		# Completely ignore obsolete and fuzzy messages
-		if x['obsolete'] == true or x['fuzzy'] == true or x['msgid'] == ''
-			next
-		end
-
+	load_messages_valid(i_file_full).each do |x|
 		dump_message_to_isearch(i_file, x, x['index'])
 
 		# Dump message to database
@@ -87,11 +98,6 @@ def fill_databases_from_file(i_file_full, i_file)
 #		p x
 #		p x['msgstr']['*']
 
-		if not [1, 4].include?(x['msgstr'].size) # number of plural forms
-			#raise
-
-			puts "Warning: wrong number of plural forms"
-		end
 	end
 end
 
