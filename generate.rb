@@ -63,7 +63,7 @@ input_files.each do |i_file_full|
 	a = load_messages(i_file_full)
 	a.each_with_index do |x,index|
 		# Completely ignore obsolete and fuzzy messages
-		if x['obsolete'] == true or x['fuzzy'] == true
+		if x['obsolete'] == true or x['fuzzy'] == true or x['msgid'] == ''
 			next
 		end
 
