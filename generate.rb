@@ -34,16 +34,31 @@ class CreateDb < ActiveRecord::Migration
 			t.text :msgstr3
 		end
 
+		create_table :po_files do |t|
+			t.string :filename
+			t.string :sha1
+		end
+
 		add_index :po_messages, [:filename, :index]
 	end
 
 	def self.down
 		drop_table :po_messages if table_exists?(:po_messages)
+		drop_table :po_files if table_exists?(:po_files)
 	end
 end
 
-CreateDb.migrate(:down)
-CreateDb.migrate(:up)
+class PoMessageEntry < ActiveRecord::Base
+	set_table_name "po_messages"
+end
+
+class PoFile < ActiveRecord::Base
+end
+
+if not PoMessageEntry.table_exists? or not PoFile.table_exists?
+	CreateDb.migrate(:down)
+	CreateDb.migrate(:up)
+end
 
 class ISearchDump
 	def initialize
@@ -80,10 +95,6 @@ def load_messages_valid(i_file_full)
 	end
 
 	a
-end
-
-class PoMessageEntry < ActiveRecord::Base
-	set_table_name "po_messages"
 end
 
 def each_file_with_rel(input_files, &block)
