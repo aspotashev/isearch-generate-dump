@@ -1,4 +1,5 @@
 
+// http://www.gnu.org/software/gettext/manual/gettext.html#libgettextpo
 #include <gettext-po.h>
 #include <assert.h>
 #include "ruby.h"
