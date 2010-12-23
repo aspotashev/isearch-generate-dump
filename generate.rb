@@ -3,6 +3,7 @@
 require 'active_record'
 require './lib.rb'
 require 'iconv'
+require 'digest/sha1'
 
 def dump_message_text(m)
 # TODO: dump more
@@ -105,14 +106,23 @@ def each_file_with_rel(input_files, &block)
 	end
 end
 
-dumper = ISearchDump.new
-each_file_with_rel(input_files) do |i_file_full, i_file|
-	puts "Parsing " + i_file_full
+def map_file_to_rel(input_files)
+	res = []
 
+	each_file_with_rel(input_files) do |i_file_full, i_file|
+		res << i_file
+	end
+
+	res
+end
+
+def remove_file_from_database(i_file)
+	PoMessageEntry.delete_all(["filename = ?", i_file])
+	PoFile.delete_all(["filename = ?", i_file])
+end
+
+def insert_messages_into_database(i_file_full, i_file)
 	load_messages_valid(i_file_full).each do |x|
-		dumper.dump_message_to_isearch(i_file, x, x['index'])
-
-		# Dump message to database
 		PoMessageEntry.create(
 			:filename => i_file,
 			:index => x['index'],
@@ -122,6 +132,49 @@ each_file_with_rel(input_files) do |i_file_full, i_file|
 			:msgstr1 => x['msgstr'][1],
 			:msgstr2 => x['msgstr'][2],
 			:msgstr3 => x['msgstr'][3])
+	end
+end
+
+def calc_sha1(i_file_full)
+	hashfunc = Digest::SHA1.new
+	hashfunc.update(File.open(i_file_full).read)
+	hashfunc.hexdigest
+end
+
+#-------------------------------------- doing the job ------------------------------
+
+#=== dump for isearch ===
+dumper = ISearchDump.new
+puts "Generating dump for isearch..."
+each_file_with_rel(input_files) do |i_file_full, i_file|
+	load_messages_valid(i_file_full).each do |x|
+		dumper.dump_message_to_isearch(i_file, x, x['index'])
+	end
+end
+
+#=== update database of strings ===
+# files removed from disk, but still existing in the database
+puts "Removing obsolete files from database..."
+(PoFile.find(:all).map(&:filename) - map_file_to_rel(input_files)).each do |i_file|
+	remove_file_from_database(i_file)
+end
+
+puts "Updating database..."
+each_file_with_rel(input_files) do |i_file_full, i_file|
+	existing_sha1 = PoFile.find_by_filename(i_file)
+	existing_sha1 = existing_sha1.sha1 if existing_sha1
+
+	new_sha1 = calc_sha1(i_file_full)
+
+
+	if existing_sha1 == new_sha1
+		puts "File did not change: " + i_file_full
+	else
+		puts "Parsing " + i_file_full
+
+		remove_file_from_database(i_file)
+		insert_messages_into_database(i_file_full, i_file)
+		PoFile.create({:filename => i_file, :sha1 => new_sha1})
 	end
 end
 
