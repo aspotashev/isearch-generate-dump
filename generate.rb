@@ -78,7 +78,13 @@ def load_messages_valid(i_file_full)
 	a
 end
 
-def fill_databases_from_file(i_file_full, i_file)
+class PoMessageEntry < ActiveRecord::Base
+	set_table_name "po_messages"
+end
+
+input_files.each do |i_file_full|
+	i_file = i_file_full.sub(conf['prefix'], '').sub(/\/*/, '')
+
 	puts "Parsing " + i_file_full
 
 	load_messages_valid(i_file_full).each do |x|
@@ -95,14 +101,5 @@ def fill_databases_from_file(i_file_full, i_file)
 			:msgstr2 => x['msgstr'][2],
 			:msgstr3 => x['msgstr'][3])
 	end
-end
-
-class PoMessageEntry < ActiveRecord::Base
-	set_table_name "po_messages"
-end
-
-input_files.each do |i_file_full|
-	i_file = i_file_full.sub(conf['prefix'], '').sub(/\/*/, '')
-	fill_databases_from_file(i_file_full, i_file)
 end
 
