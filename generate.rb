@@ -19,8 +19,6 @@ $f_mapping = File.open('../dump-map.txt', 'w')
 
 `rm ../dump-index.dat` # remove old index, need to regenerate it
 
-$pos = 0   # number of unicode chars dumped
-
 ActiveRecord::Base.establish_connection(YAML::load(File.open('database.yml')))
 
 class CreateDb < ActiveRecord::Migration
@@ -47,17 +45,23 @@ end
 CreateDb.migrate(:down)
 CreateDb.migrate(:up)
 
-def dump_message_to_isearch(i_file, x, index)
-	# Dump message to .dat file (for isearch)
-	dump_text = dump_message_text(x)
-	$f_dump.write dump_text
-	$f_mapping.puts "#{$pos} #{i_file}:#{index}"
-	$pos += dump_text.size / 2
+class ISearchDump
+	def initialize
+		@pos = 0 # number of unicode chars dumped
+	end
 
-	if ((dump_text.size % 2) != 0)
-		p dump_text.size
-		p dump_text
-		raise
+	def dump_message_to_isearch(i_file, x, index)
+		# Dump message to .dat file (for isearch)
+		dump_text = dump_message_text(x)
+		$f_dump.write dump_text
+		$f_mapping.puts "#{@pos} #{i_file}:#{index}"
+		@pos += dump_text.size / 2
+
+		if ((dump_text.size % 2) != 0)
+			p dump_text.size
+			p dump_text
+			raise
+		end
 	end
 end
 
@@ -90,11 +94,12 @@ def each_file_with_rel(input_files, &block)
 	end
 end
 
+dumper = ISearchDump.new
 each_file_with_rel(input_files) do |i_file_full, i_file|
 	puts "Parsing " + i_file_full
 
 	load_messages_valid(i_file_full).each do |x|
-		dump_message_to_isearch(i_file, x, x['index'])
+		dumper.dump_message_to_isearch(i_file, x, x['index'])
 
 		# Dump message to database
 		PoMessageEntry.create(
