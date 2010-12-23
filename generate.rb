@@ -94,10 +94,6 @@ def fill_databases_from_file(i_file_full, i_file)
 			:msgstr1 => x['msgstr'][1],
 			:msgstr2 => x['msgstr'][2],
 			:msgstr3 => x['msgstr'][3])
-
-#		p x
-#		p x['msgstr']['*']
-
 	end
 end
 
