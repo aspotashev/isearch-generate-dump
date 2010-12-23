@@ -25,9 +25,12 @@ void xerror2_handler(
 	assert(0);
 }
 
-VALUE wrap_po_message(po_message_t message)
+VALUE wrap_po_message(po_message_t message, int index)
 {
 	VALUE res = rb_hash_new();
+
+	// === msgid ===
+	rb_hash_aset(res, rb_str_new2("index"), INT2FIX(index));
 
 	// === msgid ===
 	rb_hash_aset(res, rb_str_new2("msgid"), rb_str_new2(po_message_msgid(message)));
@@ -90,9 +93,9 @@ VALUE wrap_read_po_file(VALUE self, VALUE filename)
 	// main cycle
 	po_message_iterator_t iterator = po_message_iterator(file, "messages");
 	po_message_t message; // in fact, this is a pointer
-	while (message = po_next_message(iterator))
+	for (int index = 0; message = po_next_message(iterator); index ++)
 	{
-		rb_ary_push(res, wrap_po_message(message));
+		rb_ary_push(res, wrap_po_message(message, index));
 	}
 
 	po_file_free(file); // free memory

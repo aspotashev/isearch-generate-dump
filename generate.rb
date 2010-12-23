@@ -65,18 +65,18 @@ def fill_databases_from_file(i_file_full, i_file)
 	puts "Parsing " + i_file_full
 
 	a = load_messages(i_file_full)
-	a.each_with_index do |x,index|
+	a.each do |x|
 		# Completely ignore obsolete and fuzzy messages
 		if x['obsolete'] == true or x['fuzzy'] == true or x['msgid'] == ''
 			next
 		end
 
-		dump_message_to_isearch(i_file, x, index)
+		dump_message_to_isearch(i_file, x, x['index'])
 
 		# Dump message to database
 		PoMessageEntry.create(
 			:filename => i_file,
-			:index => index,
+			:index => x['index'],
 
 			:msgid => x['msgid'],
 			:msgstr0 => x['msgstr'][0],
