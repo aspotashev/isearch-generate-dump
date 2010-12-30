@@ -1,2 +1,5 @@
 prefix: /home/webapps/kde-svn/ru
 filemask: messages/*/*.po
+dump: ../dump.dat
+dump-map: ../dump-map.txt
+dump-index: ../dump-index.dat

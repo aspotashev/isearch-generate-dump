@@ -17,8 +17,8 @@ end
 $conf = YAML::load(File.open('config.yml'))
 input_files = `ls #{$conf['prefix']}/#{$conf['filemask']}`.split("\n")
 
-$f_dump = File.open('../dump.dat', 'w')
-$f_mapping = File.open('../dump-map.txt', 'w')
+$f_dump = File.open($conf['dump'], 'w')
+$f_mapping = File.open($conf['dump-map'], 'w')
 
 class ISearchDump
 	def initialize
@@ -77,7 +77,7 @@ end
 
 #=== dump for isearch ==============================================================
 dumper = ISearchDump.new
-`rm ../dump-index.dat` # remove old index, need to regenerate it
+`rm -f #{$conf['dump-index']}` # remove old index, need to regenerate it
 
 puts "Generating dump for isearch..."
 each_file_with_rel(input_files) do |i_file_full, i_file|
