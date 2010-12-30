@@ -2,11 +2,13 @@
 
 require 'active_record'
 require './lib.rb'
+require './common-lib.rb'
 require 'iconv'
 require 'digest/sha1'
 
 def dump_message_text(m)
 # TODO: dump more
+# TODO: lowercase (to make search case-insensitive)
 
 	s = m['msgid'] + m['msgstr'][0]
 	Iconv.iconv('UCS-2', 'utf-8', s)[0]
@@ -19,47 +21,6 @@ $f_dump = File.open('../dump.dat', 'w')
 $f_mapping = File.open('../dump-map.txt', 'w')
 
 `rm ../dump-index.dat` # remove old index, need to regenerate it
-
-ActiveRecord::Base.establish_connection(YAML::load(File.open('database.yml')))
-
-class CreateDb < ActiveRecord::Migration
-	def self.up
-		create_table :po_messages do |t|
-			t.string :filename
-			t.integer :index
-
-			t.text :msgid
-			t.text :msgstr0
-			t.text :msgstr1
-			t.text :msgstr2
-			t.text :msgstr3
-		end
-
-		create_table :po_files do |t|
-			t.string :filename
-			t.string :sha1
-		end
-
-		add_index :po_messages, [:filename, :index]
-	end
-
-	def self.down
-		drop_table :po_messages if table_exists?(:po_messages)
-		drop_table :po_files if table_exists?(:po_files)
-	end
-end
-
-class PoMessageEntry < ActiveRecord::Base
-	set_table_name "po_messages"
-end
-
-class PoFile < ActiveRecord::Base
-end
-
-if not PoMessageEntry.table_exists? or not PoFile.table_exists?
-	CreateDb.migrate(:down)
-	CreateDb.migrate(:up)
-end
 
 class ISearchDump
 	def initialize
@@ -116,6 +77,57 @@ def map_file_to_rel(input_files)
 	res
 end
 
+#=== dump for isearch ==============================================================
+dumper = ISearchDump.new
+puts "Generating dump for isearch..."
+each_file_with_rel(input_files) do |i_file_full, i_file|
+	load_messages_valid(i_file_full).each do |x|
+		dumper.dump_message_to_isearch(i_file, x, x['index'])
+	end
+end
+
+#=== update database of strings ====================================================
+ActiveRecord::Base.establish_connection(YAML::load(File.open('database.yml')))
+
+class CreateDb < ActiveRecord::Migration
+	def self.up
+		create_table :po_messages do |t|
+			t.string :filename
+			t.integer :index
+
+			t.text :msgid
+			t.text :msgstr0
+			t.text :msgstr1
+			t.text :msgstr2
+			t.text :msgstr3
+		end
+
+		create_table :po_files do |t|
+			t.string :filename
+			t.string :sha1
+		end
+
+		add_index :po_messages, [:filename, :index]
+	end
+
+	def self.down
+		drop_table :po_messages if table_exists?(:po_messages)
+		drop_table :po_files if table_exists?(:po_files)
+	end
+end
+
+class PoMessageEntry < ActiveRecord::Base
+	set_table_name "po_messages"
+end
+
+class PoFile < ActiveRecord::Base
+end
+
+if not PoMessageEntry.table_exists? or not PoFile.table_exists?
+	CreateDb.migrate(:down)
+	CreateDb.migrate(:up)
+end
+
 def remove_file_from_database(i_file)
 	PoMessageEntry.delete_all(["filename = ?", i_file])
 	PoFile.delete_all(["filename = ?", i_file])
@@ -135,24 +147,7 @@ def insert_messages_into_database(i_file_full, i_file)
 	end
 end
 
-def calc_sha1(i_file_full)
-	hashfunc = Digest::SHA1.new
-	hashfunc.update(File.open(i_file_full).read)
-	hashfunc.hexdigest
-end
 
-#-------------------------------------- doing the job ------------------------------
-
-#=== dump for isearch ===
-dumper = ISearchDump.new
-puts "Generating dump for isearch..."
-each_file_with_rel(input_files) do |i_file_full, i_file|
-	load_messages_valid(i_file_full).each do |x|
-		dumper.dump_message_to_isearch(i_file, x, x['index'])
-	end
-end
-
-#=== update database of strings ===
 # files removed from disk, but still existing in the database
 puts "Removing obsolete files from database..."
 (PoFile.find(:all).map(&:filename) - map_file_to_rel(input_files)).each do |i_file|
