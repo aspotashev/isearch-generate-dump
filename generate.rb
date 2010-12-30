@@ -20,8 +20,6 @@ input_files = `ls #{$conf['prefix']}/#{$conf['filemask']}`.split("\n")
 $f_dump = File.open('../dump.dat', 'w')
 $f_mapping = File.open('../dump-map.txt', 'w')
 
-`rm ../dump-index.dat` # remove old index, need to regenerate it
-
 class ISearchDump
 	def initialize
 		@pos = 0 # number of unicode chars dumped
@@ -79,6 +77,8 @@ end
 
 #=== dump for isearch ==============================================================
 dumper = ISearchDump.new
+`rm ../dump-index.dat` # remove old index, need to regenerate it
+
 puts "Generating dump for isearch..."
 each_file_with_rel(input_files) do |i_file_full, i_file|
 	load_messages_valid(i_file_full).each do |x|
