@@ -6,39 +6,9 @@ require './common-lib.rb'
 require 'iconv'
 require 'digest/sha1'
 
-def dump_message_text(m)
-# TODO: dump more
-# TODO: lowercase (to make search case-insensitive)
-
-	s = m['msgid'] + m['msgstr'][0]
-	Iconv.iconv('UCS-2', 'utf-8', s)[0]
-end
-
 $conf = YAML::load(File.open('config.yml'))
 input_files = `ls #{$conf['prefix']}/#{$conf['filemask']}`.split("\n")
 
-$f_dump = File.open($conf['dump'], 'w')
-$f_mapping = File.open($conf['dump-map'], 'w')
-
-class ISearchDump
-	def initialize
-		@pos = 0 # number of unicode chars dumped
-	end
-
-	def dump_message_to_isearch(i_file, x, index)
-		# Dump message to .dat file (for isearch)
-		dump_text = dump_message_text(x)
-		$f_dump.write dump_text
-		$f_mapping.puts "#{@pos} #{i_file}:#{index}"
-		@pos += dump_text.size / 2
-
-		if ((dump_text.size % 2) != 0)
-			p dump_text.size
-			p dump_text
-			raise
-		end
-	end
-end
 
 def load_messages_valid(i_file_full)
 	a = load_messages(i_file_full)
@@ -76,6 +46,37 @@ def map_file_to_rel(input_files)
 end
 
 #=== dump for isearch ==============================================================
+class ISearchDump
+	def initialize
+		@pos = 0 # number of unicode chars dumped
+
+		@f_dump = File.open($conf['dump'], 'w')
+		@f_mapping = File.open($conf['dump-map'], 'w')
+	end
+
+	def dump_message_text(m)
+		# TODO: dump more
+		# TODO: lowercase (to make search case-insensitive)
+
+		s = m['msgid'] + m['msgstr'][0]
+		Iconv.iconv('UCS-2', 'utf-8', s)[0]
+	end
+
+	def dump_message_to_isearch(i_file, x, index)
+		# Dump message to .dat file (for isearch)
+		dump_text = dump_message_text(x)
+		@f_dump.write dump_text
+		@f_mapping.puts "#{@pos} #{i_file}:#{index}"
+		@pos += dump_text.size / 2
+
+		if ((dump_text.size % 2) != 0)
+			p dump_text.size
+			p dump_text
+			raise
+		end
+	end
+end
+
 dumper = ISearchDump.new
 `rm -f #{$conf['dump-index']}` # remove old index, need to regenerate it
 
