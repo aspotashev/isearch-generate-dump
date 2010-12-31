@@ -6,8 +6,6 @@ require './common-lib.rb'
 require 'iconv'
 require 'digest/sha1'
 
-$conf = YAML::load(File.open('config.yml'))
-
 
 def load_messages_valid(i_file_full)
 	a = load_messages(i_file_full)
@@ -17,9 +15,8 @@ def load_messages_valid(i_file_full)
 
 	a.each do |x|
 		if not [1, 4].include?(x['msgstr'].size) # number of plural forms
-			#raise
-
 			puts "Warning: wrong number of plural forms"
+			#raise
 		end
 	end
 
@@ -39,6 +36,8 @@ class PoFileContent
 	end
 end
 
+#=== init ==========================================================================
+$conf = YAML::load(File.open('config.yml'))
 input_files = `ls #{$conf['prefix']}/#{$conf['filemask']}`.split("\n").
 	map {|full| PoFileContent.new(full) }
 
