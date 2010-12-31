@@ -2,7 +2,6 @@
 
 require 'active_record'
 require './lib.rb'
-require './common-lib.rb'
 require 'iconv'
 require 'digest/sha1'
 
@@ -33,6 +32,12 @@ class PoFileContent
 
 	def data
 		load_messages_valid(file_full)
+	end
+
+	def calc_sha1
+		hashfunc = Digest::SHA1.new
+		hashfunc.update(File.open(@file_full).read)
+		hashfunc.hexdigest
 	end
 end
 
@@ -159,7 +164,7 @@ if $conf['fill-db']
 		existing_sha1 = PoFile.find_by_filename(f.file)
 		existing_sha1 = existing_sha1.sha1 if existing_sha1
 
-		new_sha1 = calc_sha1(f.file_full)
+		new_sha1 = f.calc_sha1
 
 
 		if existing_sha1 == new_sha1
@@ -321,7 +326,7 @@ f.comment "Data for Name: po_files; Type: TABLE DATA; Schema: public; Owner: kde
 f.puts
 f.puts "COPY po_files (id, filename, sha1) FROM stdin;"
 input_files.each_with_index do |file, index|
-	f.print_row [index+1, file.file, calc_sha1(file.file_full)]
+	f.print_row [index+1, file.file, file.calc_sha1]
 end
 f.puts "\\."
 f.puts
