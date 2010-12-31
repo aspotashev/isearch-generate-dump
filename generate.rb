@@ -7,7 +7,6 @@ require 'iconv'
 require 'digest/sha1'
 
 $conf = YAML::load(File.open('config.yml'))
-input_files = `ls #{$conf['prefix']}/#{$conf['filemask']}`.split("\n")
 
 
 def load_messages_valid(i_file_full)
@@ -45,6 +44,22 @@ def map_file_to_rel(input_files)
 	res
 end
 
+class PoFileContent
+	attr_accessor :file, :file_full
+
+	def initialize(full)
+		@file_full = full
+		@file = @file_full.sub($conf['prefix'], '').sub(/\/*/, '')
+	end
+
+	def data
+		load_messages_valid(file_full)
+	end
+end
+
+input_files = `ls #{$conf['prefix']}/#{$conf['filemask']}`.split("\n").
+	map {|full| PoFileContent.new(full) }
+
 #=== dump for isearch ==============================================================
 class ISearchDump
 	def initialize
@@ -81,9 +96,9 @@ dumper = ISearchDump.new
 `rm -f #{$conf['dump-index']}` # remove old index, need to regenerate it
 
 puts "Generating dump for isearch..."
-each_file_with_rel(input_files) do |i_file_full, i_file|
-	load_messages_valid(i_file_full).each do |x|
-		dumper.dump_message_to_isearch(i_file, x, x['index'])
+input_files.each do |f|
+	load_messages_valid(f.file_full).each do |x|
+		dumper.dump_message_to_isearch(f.file, x, x['index'])
 	end
 end
 
@@ -151,26 +166,29 @@ end
 
 # files removed from disk, but still existing in the database
 puts "Removing obsolete files from database..."
-(PoFile.find(:all).map(&:filename) - map_file_to_rel(input_files)).each do |i_file|
+(PoFile.find(:all).map(&:filename) - input_files.map(&:file)).each do |i_file|
 	remove_file_from_database(i_file)
 end
 
 puts "Updating database..."
-each_file_with_rel(input_files) do |i_file_full, i_file|
-	existing_sha1 = PoFile.find_by_filename(i_file)
+input_files.each do |f|
+	existing_sha1 = PoFile.find_by_filename(f.file)
 	existing_sha1 = existing_sha1.sha1 if existing_sha1
 
-	new_sha1 = calc_sha1(i_file_full)
+	new_sha1 = calc_sha1(f.file_full)
 
 
 	if existing_sha1 == new_sha1
-		puts "File did not change: " + i_file_full
+		puts "File did not change: " + f.file_full
 	else
-		puts "Parsing " + i_file_full
+		puts "Parsing " + f.file_full
 
-		remove_file_from_database(i_file)
-		insert_messages_into_database(i_file_full, i_file)
-		PoFile.create({:filename => i_file, :sha1 => new_sha1})
+		remove_file_from_database(f.file)
+		insert_messages_into_database(f.file_full, f.file)
+		PoFile.create({:filename => f.file, :sha1 => new_sha1})
 	end
 end
+
+#=== create database sql dump ====================================================
+
 
