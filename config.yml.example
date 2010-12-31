@@ -3,3 +3,4 @@ filemask: messages/*/*.po
 dump: ../dump.dat
 dump-map: ../dump-map.txt
 dump-index: ../dump-index.dat
+fill-db: false
