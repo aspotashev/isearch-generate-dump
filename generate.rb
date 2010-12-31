@@ -130,10 +130,10 @@ def remove_file_from_database(i_file)
 	PoFile.delete_all(["filename = ?", i_file])
 end
 
-def insert_messages_into_database(i_file_full, i_file)
-	load_messages_valid(i_file_full).each do |x|
+def insert_messages_into_database(f)
+	f.data.each do |x|
 		PoMessageEntry.create(
-			:filename => i_file,
+			:filename => f.file,
 			:index => x['index'],
 
 			:msgid => x['msgid'],
@@ -165,7 +165,7 @@ input_files.each do |f|
 		puts "Parsing " + f.file_full
 
 		remove_file_from_database(f.file)
-		insert_messages_into_database(f.file_full, f.file)
+		insert_messages_into_database(f)
 		PoFile.create({:filename => f.file, :sha1 => new_sha1})
 	end
 end
