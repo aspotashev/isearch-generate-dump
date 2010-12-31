@@ -35,6 +35,9 @@ class PoFileContent
 	end
 
 	def data
+		# do not cache for 2 reasons:
+		#   1. cache would take ~100 MB of memory
+		#   2. cache slows down the process somehow(!)
 		load_messages_valid(file_full)
 	end
 
