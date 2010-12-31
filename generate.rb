@@ -78,7 +78,7 @@ dumper = ISearchDump.new
 
 puts "Generating dump for isearch..."
 input_files.each do |f|
-	load_messages_valid(f.file_full).each do |x|
+	f.data.each do |x|
 		dumper.dump_message_to_isearch(f.file, x, x['index'])
 	end
 end
