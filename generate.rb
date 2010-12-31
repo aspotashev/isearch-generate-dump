@@ -26,24 +26,6 @@ def load_messages_valid(i_file_full)
 	a
 end
 
-def each_file_with_rel(input_files, &block)
-	input_files.each do |i_file_full|
-		i_file = i_file_full.sub($conf['prefix'], '').sub(/\/*/, '')
-
-		block[i_file_full, i_file]
-	end
-end
-
-def map_file_to_rel(input_files)
-	res = []
-
-	each_file_with_rel(input_files) do |i_file_full, i_file|
-		res << i_file
-	end
-
-	res
-end
-
 class PoFileContent
 	attr_accessor :file, :file_full
 
