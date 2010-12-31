@@ -14,7 +14,11 @@ def load_messages_valid(i_file_full)
 
 	a.each do |x|
 		if not [1, 4].include?(x['msgstr'].size) # number of plural forms
-			puts "Warning: wrong number of plural forms"
+			puts "Warning: wrong number of plural forms:"
+			print '    '
+			p i_file_full
+			print '    '
+			p x
 			#raise
 		end
 	end
