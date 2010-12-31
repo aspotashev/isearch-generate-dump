@@ -269,7 +269,7 @@ CREATE SEQUENCE #{name}_id_seq
 end
 
 puts "Generating SQL dump for PostgreSQL..."
-f = SqlDumpFile.open('db.sql', 'w')
+f = SqlDumpFile.open($conf['sql-dump-path'], 'w')
 # intro
 f.comment 'PostgreSQL database dump'
 f.puts
